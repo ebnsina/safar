@@ -80,8 +80,13 @@ Set these three variables in the Vercel project, for every environment you deplo
 | `DATABASE_AUTH_TOKEN` | A Turso token — `turso db tokens create safar-ebnsina` |
 | `PUBLIC_SITE_URL`     | The deployment origin, e.g. `https://safar.vercel.app` |
 
-`PUBLIC_SITE_URL` is read at build time for canonical and Open Graph tags, so a
-preview deployment shows the production origin unless you override it per environment.
+All three are read when the app starts, not inlined at build time, so changing one in
+Vercel takes effect on redeploy without a rebuild. `PUBLIC_SITE_URL` is the only one
+exposed to the browser; the other two stay server-only and are unavailable to client
+code by construction.
+
+Every value is validated at boot. A malformed `DATABASE_URL`, or a remote URL with no
+token, fails the deployment immediately rather than serving broken pages.
 
 Seed the production database once, from your machine, against the Turso URL:
 
