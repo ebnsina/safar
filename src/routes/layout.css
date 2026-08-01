@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/mona-sans/wdth.css';
+@import '@fontsource-variable/geist-mono/wght.css';
+@import '../lib/styles/theme.css';
+@import '../lib/styles/base.css';
+
+@plugin '@tailwindcss/forms';
+
+@source '../';

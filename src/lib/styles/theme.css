@@ -1,0 +1,62 @@
+/*
+ * Fajr Labs design tokens. Every value is a neutral with a slight cool bias —
+ * no hue is used anywhere, including for state and emphasis.
+ */
+@theme {
+	--font-sans:
+		'Mona Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+	--font-arabic: 'SF Arabic', 'Geeza Pro', 'Noto Naskh Arabic', serif;
+
+	--radius-xs: 0.125rem;
+	--radius-sm: 0.1875rem;
+	--radius-md: 0.25rem;
+	--radius-lg: 0.375rem;
+
+	--ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+	/* Horizontal page padding, reading measure and the left label column. */
+	--spacing-gutter: clamp(20px, 4.4vw, 56px);
+	--container-measure: 62ch;
+	--spacing-rail: 152px;
+	--container-shell: 1240px;
+}
+
+@layer theme {
+	:root {
+		--paper: #ffffff;
+		--surface: #f7f7f8;
+		--ink: #0b0b0d;
+		--muted: #63636d;
+		--faint: #94949f;
+		--rule: #ededf0;
+		--rule-strong: #dededf;
+		--inverse-paper: #0b0b0d;
+		--inverse-ink: #f4f4f6;
+	}
+
+	:root[data-theme='dark'] {
+		--paper: #0a0a0c;
+		--surface: #111114;
+		--ink: #ececef;
+		--muted: #9797a2;
+		--faint: #6b6b76;
+		--rule: #1c1c21;
+		--rule-strong: #2b2b32;
+		--inverse-paper: #f4f4f6;
+		--inverse-ink: #0b0b0d;
+	}
+}
+
+/* Expose the palette as utilities: bg-paper, text-ink, border-rule … */
+@theme inline {
+	--color-paper: var(--paper);
+	--color-surface: var(--surface);
+	--color-ink: var(--ink);
+	--color-muted: var(--muted);
+	--color-faint: var(--faint);
+	--color-rule: var(--rule);
+	--color-rule-strong: var(--rule-strong);
+	--color-inverse-paper: var(--inverse-paper);
+	--color-inverse-ink: var(--inverse-ink);
+}
