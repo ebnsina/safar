@@ -16,6 +16,9 @@ import { createSeedClient } from './client';
 
 const CHUNK_SIZE = 400;
 
+/** Insert statements grouped into a single round trip when the database is remote. */
+const STATEMENTS_PER_REQUEST = 4;
+
 function chunk<T>(items: T[], size: number): T[][] {
 	const chunks: T[][] = [];
 	for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size));
@@ -29,7 +32,7 @@ function parseDays(fallback: number): number {
 }
 
 async function main() {
-	const { client, db } = createSeedClient();
+	const { client, db, isRemote } = createSeedClient();
 	const region = getRegion();
 	const days = parseDays(region.maxAdvanceDays);
 	const startedAt = Date.now();
@@ -48,9 +51,11 @@ async function main() {
 		].join('\n')
 	);
 
-	// Bulk load settings; only meaningful for a local file database.
-	await client.execute('PRAGMA journal_mode = WAL');
-	await client.execute('PRAGMA synchronous = OFF');
+	// Bulk load settings only apply to a local file; a remote database rejects them.
+	if (!isRemote) {
+		await client.execute('PRAGMA journal_mode = WAL');
+		await client.execute('PRAGMA synchronous = OFF');
+	}
 
 	console.log('Clearing existing data…');
 	for (const table of [
@@ -70,12 +75,28 @@ async function main() {
 	const load = async <T>(name: string, table: SQLiteTable, rows: T[]) => {
 		if (rows.length === 0) return;
 		process.stdout.write(`Loading ${name}… `);
-		const batches = chunk(rows, CHUNK_SIZE);
-		for (const batch of batches) {
+
+		const inserts = chunk(rows, CHUNK_SIZE).map((batch) =>
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			await db.insert(table).values(batch as any);
+			db.insert(table).values(batch as any)
+		);
+
+		// Over the network, several inserts ride in one request; locally they are cheap anyway.
+		let done = 0;
+		for (const group of chunk(inserts, isRemote ? STATEMENTS_PER_REQUEST : 1)) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			if (group.length > 1) await db.batch(group as any);
+			else await group[0];
+
+			done += group.length * CHUNK_SIZE;
+			if (isRemote && rows.length > CHUNK_SIZE * STATEMENTS_PER_REQUEST) {
+				process.stdout.write(
+					`\rLoading ${name}… ${Math.min(done, rows.length).toLocaleString()}/${rows.length.toLocaleString()}`
+				);
+			}
 		}
-		console.log(`${rows.length.toLocaleString()} rows`);
+
+		process.stdout.write(`\rLoading ${name}… ${rows.length.toLocaleString()} rows            \n`);
 	};
 
 	await load('places', place, data.places);

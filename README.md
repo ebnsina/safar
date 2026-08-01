@@ -67,6 +67,33 @@ Input validation is written once with valibot and runs in both places: the brows
 | `pnpm db:reset`             | Schema then seed                  |
 | `pnpm db:studio`            | Browse the database               |
 
+## Deploying to Vercel
+
+The app builds with `@sveltejs/adapter-vercel` on the Node runtime, pinned to `bom1`
+(Mumbai) so the functions sit beside the Turso database rather than a continent away.
+
+Set these three variables in the Vercel project, for every environment you deploy:
+
+| Variable              | Value                                                  |
+| --------------------- | ------------------------------------------------------ |
+| `DATABASE_URL`        | `libsql://safar-ebnsina.aws-ap-south-1.turso.io`       |
+| `DATABASE_AUTH_TOKEN` | A Turso token — `turso db tokens create safar-ebnsina` |
+| `PUBLIC_SITE_URL`     | The deployment origin, e.g. `https://safar.vercel.app` |
+
+`PUBLIC_SITE_URL` is read at build time for canonical and Open Graph tags, so a
+preview deployment shows the production origin unless you override it per environment.
+
+Seed the production database once, from your machine, against the Turso URL:
+
+```sh
+DATABASE_URL="libsql://safar-ebnsina.aws-ap-south-1.turso.io" \
+DATABASE_AUTH_TOKEN="…" \
+pnpm db:push --force && pnpm db:seed
+```
+
+Seeding is a one-off data load, not part of the build. Nothing in the deploy pipeline
+touches it.
+
 ## Adding a market
 
 Safar ships with Bangladesh. To add another:
