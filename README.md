@@ -88,16 +88,29 @@ code by construction.
 Every value is validated at boot. A malformed `DATABASE_URL`, or a remote URL with no
 token, fails the deployment immediately rather than serving broken pages.
 
-Seed the production database once, from your machine, against the Turso URL:
+Set them for **Production, Preview and Development**. They are needed at build time as
+well as at run time — SvelteKit imports server modules while analysing the build — so a
+missing value fails the deploy rather than the first request.
+
+### Seeding production
+
+Put the credentials in `.env.seed`, which is gitignored:
 
 ```sh
-DATABASE_URL="libsql://safar-ebnsina.aws-ap-south-1.turso.io" \
-DATABASE_AUTH_TOKEN="…" \
-pnpm db:push --force && pnpm db:seed
+DATABASE_URL="libsql://safar-ebnsina.aws-ap-south-1.turso.io"
+DATABASE_AUTH_TOKEN="…"
 ```
 
-Seeding is a one-off data load, not part of the build. Nothing in the deploy pipeline
-touches it.
+Then, once:
+
+```sh
+pnpm db:push:remote --force   # create the schema
+pnpm db:seed:remote           # load the data
+```
+
+The file is deliberately **not** called `.env.production`: Vite auto-loads that name
+during `vite build`, which would both break the build and bake production credentials
+into it. Seeding is a one-off data load and is never part of the deploy.
 
 ## Adding a market
 

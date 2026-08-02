@@ -3,12 +3,17 @@
 	import { SITE } from '#lib/config/site';
 	import { TRANSPORT_MODES, describeMode } from '#lib/domain/modes';
 	import { contentFor } from '#lib/domain/mode-content';
+	import { FEATURED_CITIES } from '#lib/domain/featured';
+	import { toCalendarDate } from '#lib/format';
 	import Meta from '#lib/components/Meta.svelte';
 	import Section from '#lib/components/layout/Section.svelte';
+	import CityCard from '#lib/components/home/CityCard.svelte';
+	import Faq from '#lib/components/home/Faq.svelte';
 	import Icon from '#lib/components/ui/Icon.svelte';
 	import { ICONS, MODE_ICONS } from '#lib/components/ui/icons';
 
 	const region = getRegion();
+	const tomorrow = toCalendarDate(Date.now() + 86_400_000);
 
 	const steps = [
 		{
@@ -69,6 +74,16 @@
 	</ul>
 </Section>
 
+<Section label="Where to" rule>
+	<ul class="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+		{#each FEATURED_CITIES as city (city.id)}
+			<li>
+				<CityCard {city} date={tomorrow} />
+			</li>
+		{/each}
+	</ul>
+</Section>
+
 <Section label="How it works" rule>
 	<ol class="grid gap-10 sm:grid-cols-3">
 		{#each steps as step, index (step.title)}
@@ -79,4 +94,9 @@
 			</li>
 		{/each}
 	</ol>
+</Section>
+
+<Section label="Questions" rule labelledBy="faq-heading">
+	<h2 id="faq-heading" class="type-section mb-8">Before you book</h2>
+	<Faq />
 </Section>
