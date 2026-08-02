@@ -23,7 +23,7 @@
 		"db:reset": "pnpm db:push --force && pnpm db:seed",
 		"art:generate": "tsx src/lib/server/seed/artwork-run.ts",
 		"db:seed:remote": "tsx --env-file=.env.seed src/lib/server/seed/run.ts",
-		"db:push:remote": "node --env-file=.env.seed ./node_modules/.bin/drizzle-kit push"
+		"db:push:remote": "node --env-file=.env.seed node_modules/drizzle-kit/bin.cjs push"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
