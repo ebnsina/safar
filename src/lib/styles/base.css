@@ -117,4 +117,32 @@
 	.arabic {
 		font-family: var(--font-arabic);
 	}
+
+	/* Aurora ribbons drifting behind the city cards. Colour comes from currentColor. */
+	.aurora-ribbon {
+		position: absolute;
+		border-radius: 9999px;
+		background: radial-gradient(closest-side, currentColor, transparent 78%);
+		will-change: transform;
+		animation: aurora-drift var(--aurora-duration) var(--aurora-delay) infinite alternate
+			ease-in-out;
+	}
+
+	@keyframes aurora-drift {
+		from {
+			transform: translate(-50%, -50%) rotate(var(--aurora-rotate)) scaleX(1) translateX(-4%);
+		}
+		to {
+			transform: translate(-50%, -50%) rotate(calc(var(--aurora-rotate) + 12deg)) scaleX(1.22)
+				translateX(5%);
+		}
+	}
+
+	/* The base layer already halts animation; hold the ribbons at a composed position. */
+	@media (prefers-reduced-motion: reduce) {
+		.aurora-ribbon {
+			animation: none;
+			transform: translate(-50%, -50%) rotate(var(--aurora-rotate));
+		}
+	}
 }

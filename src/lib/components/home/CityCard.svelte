@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { auroraFor } from '#lib/domain/aurora';
 	import type { FeaturedCity } from '#lib/domain/featured';
 	import Icon from '../ui/Icon.svelte';
 	import { ICONS, MODE_ICONS } from '../ui/icons';
@@ -14,24 +15,36 @@
 	let { city, date, from = 'dhaka' }: Props = $props();
 
 	const href = $derived(`/search/${city.mode}?from=${from}&to=${city.id}&date=${date}`);
+	const ribbons = $derived(auroraFor(city.id, city.latitude, city.longitude));
 </script>
 
 <a {href} class="group block">
 	<!--
-		The artwork is a mask rather than an image, so it is painted in the current ink
-		and inverts with the theme instead of carrying colour of its own.
+		Every blob is painted in currentColor, so the aurora is monochrome by construction
+		and inverts with the theme. Only opacity and size carry the tonal range.
 	-->
-	<div class="relative aspect-4/5 overflow-hidden bg-surface">
+	<div class="relative aspect-4/5 overflow-hidden bg-surface text-ink">
 		<div
-			class="absolute inset-0 bg-current text-faint transition-transform duration-500 ease-out-quart group-hover:scale-[1.04]"
-			style="
-				mask-image: url('/cities/{city.id}.svg');
-				mask-size: cover;
-				mask-position: center;
-				mask-repeat: no-repeat;
-			"
+			class="absolute inset-0 transition-transform duration-700 ease-out-quart group-hover:scale-105"
 			aria-hidden="true"
-		></div>
+		>
+			{#each ribbons as ribbon, index (index)}
+				<span
+					class="aurora-ribbon"
+					style="
+						left: {ribbon.x}%;
+						top: {ribbon.y}%;
+						width: {ribbon.width}%;
+						height: {ribbon.height}%;
+						opacity: calc({ribbon.opacity} * var(--aurora-strength));
+						filter: blur({ribbon.blur}px);
+						--aurora-rotate: {ribbon.rotate}deg;
+						--aurora-duration: {ribbon.duration}s;
+						--aurora-delay: {ribbon.delay}s;
+					"
+				></span>
+			{/each}
+		</div>
 	</div>
 
 	<div class="flex items-start justify-between gap-4 pt-4">
